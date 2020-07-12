@@ -48,7 +48,7 @@ class Logger_K2000M:
 		########################################################
 		while True:
 			try:
-				instr = K2000M.K2000M(self.port, self.baud, self.eol, False)
+				instr = K2000M.K2000M(self.port, self.baud, self.eol, True)
 				print(instr.return_id())
 				instr.set_dc_voltage()
 			except Exception as e: # catch error and ignore it

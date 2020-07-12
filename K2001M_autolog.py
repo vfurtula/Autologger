@@ -48,7 +48,7 @@ class Logger_K2001M:
 		########################################################
 		while True:
 			try:
-				instr = K2001M.K2001M(self.port, self.baud, self.eol, False)
+				instr = K2001M.K2001M(self.port, self.baud, self.eol, True)
 				print(instr.return_id())
 				instr.set_dc_current()
 			except Exception as e: # catch error and ignore it

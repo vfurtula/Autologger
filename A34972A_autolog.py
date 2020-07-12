@@ -45,7 +45,7 @@ class Logger_A34972A:
 		########################################################
 		while True:
 			try:
-				instr = A34972A.A34972A(self.port, False)
+				instr = A34972A.A34972A(self.port, True)
 				print(instr.return_id())
 				instr.set_dc_voltage()
 			except Exception as e: # catch error and ignore it

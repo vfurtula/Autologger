@@ -558,36 +558,39 @@ class Run_gui(QMainWindow):
 			self.p3[i].setClipToView(True)
 			
 	def runstop(self):
-		# Check that all channels from the string are valid
-		for i in str(self.chnlsEdit.text()).split(','):
-			if not i[0:2] == "at":
-				QMessageBox.critical( self, 'Message', ''.join(["All A34972A channels should start with letters at"]) )
-				return
-			elif not self.is_number(i[2:]):
-				QMessageBox.critical( self, 'Message', ''.join(["All A34972A channels should end with a three digits channel number f.ex. at112"]) )
-				return
-		
-		# Check that the specified path exists
-		self.cwd = str(self.cwdEdit.text())
-		if not os.path.isdir(self.cwd):
-			QMessageBox.warning( self, 'Message', ''.join(["The specified directory ->\n",self.cwd,"\nis not anywhere on this computer!"]) )
-			return
-		
 		sender=self.sender()
 		
 		if sender.text() in ["Plot data","*Plot data*"]:
+			# Check that the specified path exists
+			if not os.path.isdir(str(self.cwdEdit.text())):
+				QMessageBox.warning( self, 'Message', ''.join(["The specified working directory ->\n",str(self.cwdEdit.text()),"\nis not anywhere on this computer!"]) )
+				return
+			else:
+				self.cwd = str(self.cwdEdit.text())
+			
+			# Check that all channels from the string are valid
+			for i in str(self.chnlsEdit.text()).split(','):
+				if not i[0:2] == "at":
+					QMessageBox.critical( self, 'Message', ''.join(["All A34972A channels should start with letters at"]) )
+					return
+				elif not self.is_number(i[2:]):
+					QMessageBox.critical( self, 'Message', ''.join(["All A34972A channels should end with a three digits channel number f.ex. at112"]) )
+					return
+				
 			if self.chnls != str(self.chnlsEdit.text()).split(','):
 				self.reset_a34972a_widgets()
+				
 			# Save the current path to the config file
 			if sender.text() == "*Plot data*":
-				self.config.set("Settings","cwd", self.cwd )
+				self.config.set("Settings","cwd", str(self.cwdEdit.text()) )
 				self.config.set("Settings","points", str(self.points) )
 				self.config.set("Settings","wait_time", str(self.wait_time) )
 				self.config.set("Settings","datahist", self.datahist )
 				self.config.set("Settings","interp", self.interp )
-				self.config.set("Settings","a34972achnls", ','.join([i for i in self.chnls])  )
+				self.config.set("Settings","a34972achnls", ','.join([i for i in str(self.chnlsEdit.text()).split(',')])  )
 				with open("config.ini", "w") as configfile:
 					self.config.write(configfile)
+					
 			# Run the plotter function
 			self.set_run()
 		elif sender.text()=="STOP plotting":
@@ -598,8 +601,7 @@ class Run_gui(QMainWindow):
 		if not os.path.isfile(''.join([self.cwd,os.sep,"logfiles",os.sep,"k2000m.db"])):
 			QMessageBox.warning( self, 'Message', ''.join(["The file -> k2000m.db\nis not found in the specified path ->\n",self.cwd,os.sep,"logfiles"]) )
 		
-		db = ''.join([self.cwd,os.sep,"logfiles",os.sep,"k2000m.db"])
-		self.conn_k2000m = sqlite3.connect(db)
+		self.conn_k2000m = sqlite3.connect(''.join([self.cwd,os.sep,"logfiles",os.sep,"k2000m.db"]))
 		self.cursor_k2000m = self.conn_k2000m.cursor()
 		
 		self.worker_k2000m = Worker_K2000M(self.cwd)
@@ -612,8 +614,7 @@ class Run_gui(QMainWindow):
 		if not os.path.isfile(''.join([self.cwd,os.sep,"logfiles",os.sep,"k2001m.db"])):
 			QMessageBox.warning( self, 'Message', ''.join(["The file -> k2001m.db\nis not found in the specified path ->\n",self.cwd,os.sep,"logfiles"]) )
 		
-		db = ''.join([self.cwd,os.sep,"logfiles",os.sep,"k2001m.db"])
-		self.conn_k2001m = sqlite3.connect(db)
+		self.conn_k2001m = sqlite3.connect(''.join([self.cwd,os.sep,"logfiles",os.sep,"k2001m.db"]))
 		self.cursor_k2001m = self.conn_k2001m.cursor()
 		
 		self.worker_k2001m = Worker_K2001M(self.cwd)
@@ -626,8 +627,7 @@ class Run_gui(QMainWindow):
 		if not os.path.isfile(''.join([self.cwd,os.sep,"logfiles",os.sep,"a34972a.db"])):
 			QMessageBox.warning( self, 'Message', ''.join(["The file -> a34972a.db\nis not found in the specified path ->\n",self.cwd,os.sep,"logfiles"]) )
 		
-		db = ''.join([self.cwd,os.sep,"logfiles",os.sep,"a34972a.db"])
-		self.conn_a34972a = sqlite3.connect(db)
+		self.conn_a34972a = sqlite3.connect(''.join([self.cwd,os.sep,"logfiles",os.sep,"a34972a.db"]))
 		self.cursor_a34972a = self.conn_a34972a.cursor()
 		
 		self.worker_a34972a = Worker_A34972A(self.cwd)
@@ -855,7 +855,6 @@ def main():
 	
 	app = QApplication(sys.argv)
 	ex = Run_gui()
-	ex.set_run()
 	#sys.exit(app.exec())
 
 	# avoid message 'Segmentation fault (core dumped)' with app.deleteLater()
